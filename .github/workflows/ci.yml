@@ -10,104 +10,150 @@ on:
       - main
       - master
 
-# Fix for the Node.js 20 deprecation warning
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
+
+  # ─────────────────────────────────────────────────────────
+  # JOB 1: Lint Code
+  # ─────────────────────────────────────────────────────────
   linting:
-    name: Lint Code
+    name: "① Lint Code"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
+          cache: "pip"
+
       - name: Install flake8
         run: pip install flake8
-      - name: Lint with flake8
-        run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
+      - name: Lint — syntax errors / undefined names (hard fail)
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Lint — style warnings (soft / informational)
+        run: flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+  # ─────────────────────────────────────────────────────────
+  # JOB 2: Security Scan (Bandit)
+  # ─────────────────────────────────────────────────────────
   security-scan:
-    name: Security Scan
+    name: "② Security Scan"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
+
       - name: Install Bandit
         run: pip install bandit
-      - name: Run Bandit Security Scan
-        run: bandit -r . -f custom -ll -ii -x ./.venv,./tests
 
+      # -ll  → only medium & high severity
+      # -ii  → only medium & high confidence
+      # Exit code 0 is returned when no issues are found at that threshold.
+      # The code was fixed so this should now pass cleanly.
+      - name: Run Bandit Security Scan
+        run: |
+          bandit -r . -ll -ii \
+            --exclude ./.venv,./tests \
+            --format text
+
+  # ─────────────────────────────────────────────────────────
+  # JOB 3: Static Type Checking (mypy)
+  # ─────────────────────────────────────────────────────────
   type-checking:
-    name: Type Checking
+    name: "③ Type Checking"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
+
       - name: Install mypy
         run: pip install mypy
+
+      # `|| true` keeps the job green — mypy is informational for now
       - name: Run mypy
         run: mypy . --ignore-missing-imports || true
 
+  # ─────────────────────────────────────────────────────────
+  # JOB 4: Unit Tests (depends on Lint + Security)
+  # ─────────────────────────────────────────────────────────
   unit-tests:
-    name: Unit Tests
+    name: "④ Unit Tests"
     runs-on: ubuntu-latest
     needs: [linting, security-scan]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
+          cache: "pip"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Run tests with pytest
-        run: pytest tests/
 
+      - name: Run tests
+        run: pytest tests/ -v
+
+  # ─────────────────────────────────────────────────────────
+  # JOB 5: Build Artifacts (depends on Unit Tests)
+  # ─────────────────────────────────────────────────────────
   build-artifacts:
-    name: Build Artifacts
+    name: "⑤ Build Artifacts"
     runs-on: ubuntu-latest
     needs: unit-tests
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Create release zip
-        run: zip -r release.zip . -x "*.git*" "*venv*"
-      - name: Upload Artifact
+        run: |
+          zip -r release.zip . \
+            -x "*.git*" "*/.venv/*" "*__pycache__*" "*.pyc"
+
+      - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
           name: project-release
           path: release.zip
+          retention-days: 7
 
+  # ─────────────────────────────────────────────────────────
+  # JOB 6: Deploy — Dry Run (depends on Build)
+  # ─────────────────────────────────────────────────────────
   deploy-dry-run:
-    name: Deploy (Dry Run)
+    name: "⑥ Deploy (Dry Run)"
     runs-on: ubuntu-latest
     needs: build-artifacts
     steps:
-      - name: Download Artifact
+      - name: Download release artifact
         uses: actions/download-artifact@v4
         with:
           name: project-release
-      - name: Simulate Deployment
+
+      - name: Simulate deployment
         run: |
-          echo "Simulating deployment..."
-          echo "Successfully 'deployed' release.zip to production."
+          echo "================================================"
+          echo "  Deployment Simulation"
+          echo "================================================"
+          echo "Artifact: $(ls -lh release.zip)"
+          echo "Status  : Successfully deployed to staging 🚀"
+          echo "================================================"
