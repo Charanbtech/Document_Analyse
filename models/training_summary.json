@@ -1,0 +1,10 @@
+{
+  "baseline_accuracy": 0.104,
+  "test_accuracy": 0.8955,
+  "cv_mean": 0.9334,
+  "cv_std": 0.0113,
+  "num_classes": 10,
+  "train_samples": 5765,
+  "test_samples": 3837,
+  "trained_at": "2026-04-28T11:09:50.068311"
+}
