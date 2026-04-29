@@ -63,7 +63,7 @@ jobs:
         run: |
           bandit -r . -ll -ii \
             --exclude ./.venv,./tests \
-            --format text
+            --format txt
 
   # ─────────────────────────────────────────────────────────
   # JOB 3: Static Type Checking (mypy)
