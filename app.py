@@ -165,6 +165,16 @@ def history():
     return jsonify({"predictions": records, "count": len(records)})
 
 
+@app.route('/api/model/comparison')
+def model_comparison():
+    """Return the multi-algorithm comparison results."""
+    comparison_path = MODELS_DIR / "model_comparison.json"
+    if comparison_path.exists():
+        with open(comparison_path) as f:
+            return jsonify(json.load(f))
+    return jsonify({"error": "No comparison data found. Train the model first."}), 404
+
+
 @app.route('/api/plots/<filename>')
 def serve_plot(filename):
     plots_dir = PROJECT_ROOT / "static" / "plots"
