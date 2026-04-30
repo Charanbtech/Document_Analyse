@@ -1,601 +1,1035 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Document Classification System using Multi-Algorithm Ensemble Learning</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --bg:       #030712;
-    --surface:  rgba(17, 24, 39, 0.7);
-    --surface-hover: rgba(31, 41, 55, 0.8);
-    --border:   rgba(255, 255, 255, 0.08);
-    --border-highlight: rgba(99, 102, 241, 0.4);
-    --accent:   #6366f1;
-    --accent2:  #a855f7;
-    --success:  #10b981;
-    --warn:     #f59e0b;
-    --text:     #f9fafb;
-    --muted:    #9ca3af;
-    --mono:     'JetBrains Mono', monospace;
-    --sans:     'Inter', sans-serif;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Classification System using Multi-Algorithm Ensemble Learning</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #030712;
+      --surface: rgba(17, 24, 39, 0.7);
+      --surface-hover: rgba(31, 41, 55, 0.8);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(99, 102, 241, 0.4);
+      --accent: #6366f1;
+      --accent2: #a855f7;
+      --success: #10b981;
+      --warn: #f59e0b;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+    }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-  }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  /* Animated background gradients */
-  body::before {
-    content:'';
-    position:fixed; top:-20%; left:-10%; width:50%; height:50%;
-    background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 60%);
-    z-index:0; pointer-events:none; filter:blur(60px);
-  }
-  body::after {
-    content:'';
-    position:fixed; bottom:-20%; right:-10%; width:50%; height:50%;
-    background: radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 60%);
-    z-index:0; pointer-events:none; filter:blur(60px);
-  }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
 
-  /* ── Header ── */
-  header {
-    position: relative; z-index:10;
-    padding: 1.5rem 3rem;
-    border-bottom: 1px solid var(--border);
-    background: rgba(3, 7, 18, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .logo { display:flex; align-items:center; gap:1.2rem; }
-  .logo-icon {
-    width:48px; height:48px; border-radius:14px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display:grid; place-items:center; font-size:1.4rem;
-    box-shadow: 0 4px 20px rgba(99,102,241,0.4);
-  }
-  .logo h1 { font-size:1.6rem; font-weight:800; letter-spacing:-0.5px; }
-  .logo span { background: linear-gradient(to right, var(--accent), var(--accent2)); -webkit-background-clip: text; color: transparent; }
-  .badge {
-    font-family: var(--mono); font-size:0.7rem; font-weight:500;
-    padding: 0.3rem 0.8rem; border-radius:6px;
-    border: 1px solid var(--border); color: var(--muted);
-    background: rgba(255,255,255,0.02);
-  }
-  #status-dot {
-    width:8px; height:8px; border-radius:50%;
-    background: var(--muted); display:inline-block; margin-right:0.4rem;
-    box-shadow: 0 0 8px transparent;
-    transition: all 0.3s;
-  }
-  #status-dot.ready { background: var(--success); box-shadow: 0 0 10px var(--success); }
+    /* Animated background gradients */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 50%;
+      height: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(60px);
+    }
 
-  /* ── Layout ── */
-  .container { position:relative; z-index:5; max-width:1280px; margin:0 auto; padding:3rem; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom:3rem; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 50%;
+      height: 50%;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 60%);
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(60px);
+    }
 
-  /* ── Cards ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.8rem;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-  .card:hover { border-color: var(--border-highlight); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-  .card-label {
-    font-family: var(--sans); font-size:0.8rem; font-weight:600; color:var(--muted);
-    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.8rem;
-  }
-  .card-value { font-size:2.5rem; font-weight:800; line-height:1; letter-spacing:-1px; }
-  .card-value.accent { color:var(--accent); text-shadow: 0 0 20px rgba(99,102,241,0.3); }
-  .card-value.success { color:var(--success); text-shadow: 0 0 20px rgba(16,185,129,0.3); }
-  .card-value.warn { color:var(--warn); }
-  .card-sub { font-family:var(--mono); font-size:0.75rem; color:var(--muted); margin-top:0.6rem; }
+    /* ── Header ── */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 1.5rem 3rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(3, 7, 18, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-  /* ── Section titles ── */
-  .section-title {
-    font-size:0.85rem; font-family:var(--sans); font-weight:700;
-    text-transform:uppercase; letter-spacing:0.1em;
-    color:var(--text); margin-bottom:1.5rem; margin-top:1rem;
-    display:flex; align-items:center; gap:1rem;
-  }
-  .section-title::after { content:''; flex:1; height:1px; background:linear-gradient(to right, var(--border), transparent); }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
 
-  /* ── Tabs ── */
-  .tabs { display:flex; gap:0.5rem; margin-bottom:1.5rem; background:rgba(0,0,0,0.2); padding:0.4rem; border-radius:10px; border:1px solid var(--border); width:fit-content; }
-  .tab {
-    padding:0.6rem 1.2rem; border-radius:8px; font-size:0.85rem; font-weight:600;
-    font-family:var(--sans); cursor:pointer; border:none;
-    background:transparent; color:var(--muted); transition:all 0.2s;
-  }
-  .tab:hover { color:var(--text); }
-  .tab.active { background:var(--surface-hover); color:#fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
 
-  /* ── Textarea & inputs ── */
-  textarea, input[type=text] {
-    width:100%; background:rgba(0,0,0,0.2); border:1px solid var(--border);
-    border-radius:12px; color:var(--text); font-family:var(--mono);
-    font-size:0.9rem; padding:1.2rem; resize:vertical;
-    transition:all 0.2s; outline:none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-  }
-  textarea:focus, input[type=text]:focus { border-color:var(--accent); background:rgba(0,0,0,0.4); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
-  textarea { min-height:220px; line-height:1.5; }
+    .logo h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
 
-  /* ── File drop zone ── */
-  .dropzone {
-    border: 2px dashed var(--border); border-radius:16px; background:rgba(0,0,0,0.1);
-    padding: 4rem 2rem; text-align:center; cursor:pointer;
-    transition:all 0.3s; position:relative; overflow:hidden;
-  }
-  .dropzone:hover, .dropzone.dragover { border-color:var(--accent); background:rgba(99,102,241,0.05); }
-  .dropzone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; z-index:10; }
-  .dropzone-icon { font-size:3rem; margin-bottom:1rem; transform:translateY(0); transition:transform 0.3s; }
-  .dropzone:hover .dropzone-icon { transform:translateY(-5px); }
-  .dropzone p { color:var(--text); font-size:0.95rem; font-weight:500; }
-  .dropzone .file-hint { font-size:0.8rem; color:var(--muted); margin-top:0.6rem; font-family:var(--mono); }
+    .logo span {
+      background: linear-gradient(to right, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
 
-  /* ── Button ── */
-  .btn {
-    display:inline-flex; align-items:center; justify-content:center; gap:0.6rem;
-    padding:0.8rem 1.8rem; border-radius:10px; border:none;
-    font-family:var(--sans); font-weight:600; font-size:0.95rem;
-    cursor:pointer; transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .btn-primary { background:linear-gradient(135deg, var(--accent), #818cf8); color:#fff; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
-  .btn-primary:hover { transform:translateY(-2px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); filter:brightness(1.1); }
-  .btn-primary:disabled { opacity:0.6; cursor:not-allowed; transform:none; filter:none; box-shadow:none; }
-  .btn-outline { background:rgba(255,255,255,0.03); color:var(--text); border:1px solid var(--border); }
-  .btn-outline:hover { background:var(--surface-hover); border-color:var(--muted); transform:translateY(-1px); }
+    .badge {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.3rem 0.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
 
-  /* ── Result panel ── */
-  #result-panel {
-    background: var(--surface); border:1px solid var(--border);
-    border-radius:16px; padding:2rem; min-height:300px;
-    display:flex; flex-direction:column; justify-content:center;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    transition:all 0.4s; position:relative; overflow:hidden;
-  }
-  #result-panel::before {
-    content:''; position:absolute; top:0; left:0; width:100%; height:4px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    opacity:0; transition:opacity 0.4s;
-  }
-  #result-panel.has-result::before { opacity:1; }
-  #result-panel.has-result { border-color: rgba(99,102,241,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-  
-  .result-placeholder { text-align:center; color:var(--muted); font-size:0.95rem; font-weight:500; }
-  .result-class {
-    font-size:1.8rem; font-weight:800; font-family:var(--sans);
-    background: linear-gradient(to right, #fff, #a855f7); -webkit-background-clip: text; color: transparent;
-    margin-bottom:0.4rem; word-break:break-word; line-height:1.2;
-  }
-  .result-conf { font-size:0.9rem; color:var(--muted); margin-bottom:1.8rem; font-family:var(--mono); }
-  
-  .prob-bar-wrap { margin-bottom:0.8rem; }
-  .prob-label { font-size:0.8rem; font-weight:500; color:var(--text); margin-bottom:0.4rem; display:flex; justify-content:space-between; font-family:var(--sans); }
-  .prob-bar { height:8px; background:rgba(0,0,0,0.3); border-radius:4px; overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,0.2); }
-  .prob-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width 0.8s cubic-bezier(0.1, 0.8, 0.2, 1); }
+    #status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      display: inline-block;
+      margin-right: 0.4rem;
+      box-shadow: 0 0 8px transparent;
+      transition: all 0.3s;
+    }
 
-  /* ── History table ── */
-  .history-wrap { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; font-size:0.85rem; }
-  th { text-align:left; padding:1rem; color:var(--muted); border-bottom:1px solid var(--border); font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; }
-  td { padding:1rem; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; font-family:var(--mono); }
-  tr:hover td { background:rgba(255,255,255,0.02); }
-  .pill {
-    display:inline-flex; align-items:center; padding:0.25rem 0.6rem; border-radius:6px;
-    font-size:0.75rem; font-weight:600; font-family:var(--sans);
-    background:rgba(99,102,241,0.1); color:#818cf8; border:1px solid rgba(99,102,241,0.2);
-  }
+    #status-dot.ready {
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
 
-  /* ── Plots ── */
-  .plot-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
-  .plot-card { border:1px solid var(--border); border-radius:16px; padding:1.2rem; background:var(--surface); backdrop-filter:blur(12px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition:transform 0.3s; }
-  .plot-card:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.15); }
-  .plot-card img { width:100%; border-radius:10px; border:1px solid var(--border); }
+    /* ── Layout ── */
+    .container {
+      position: relative;
+      z-index: 5;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 3rem;
+    }
 
-  /* ── Train section ── */
-  .train-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2.5rem; backdrop-filter:blur(12px); box-shadow:0 4px 6px rgba(0,0,0,0.1); }
-  #train-log {
-    background:rgba(0,0,0,0.3); border:1px solid var(--border);
-    border-radius:10px; padding:1.2rem; font-family:var(--mono);
-    font-size:0.8rem; color:var(--muted); min-height:150px;
-    max-height:250px; overflow-y:auto; white-space:pre-wrap;
-    margin-top:1.5rem; box-shadow:inset 0 2px 4px rgba(0,0,0,0.2);
-  }
-  .spinner {
-    display:inline-block; width:16px; height:16px;
-    border:2px solid rgba(255,255,255,0.3); border-top-color:#fff;
-    border-radius:50%; animation:spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform:rotate(360deg); } }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
 
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width:6px; height:6px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.2); border-radius:3px; }
-  ::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.3); }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 2rem;
+    }
 
-  /* ── Responsive ── */
-  @media (max-width:900px) {
-    .grid-3 { grid-template-columns:1fr 1fr; }
-    .grid-2 { grid-template-columns:1fr; }
-    .plot-grid { grid-template-columns:1fr; }
-    header, .container { padding:1.5rem; }
-  }
-</style>
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.8rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card:hover {
+      border-color: var(--border-highlight);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-label {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.8rem;
+    }
+
+    .card-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .card-value.accent {
+      color: var(--accent);
+      text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .card-value.success {
+      color: var(--success);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .card-value.warn {
+      color: var(--warn);
+    }
+
+    .card-sub {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 0.85rem;
+      font-family: var(--sans);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.4rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      width: fit-content;
+    }
+
+    .tab {
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: var(--sans);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      color: var(--text);
+    }
+
+    .tab.active {
+      background: var(--surface-hover);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ── Textarea & inputs ── */
+    textarea,
+    input[type=text] {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      padding: 1.2rem;
+      resize: vertical;
+      transition: all 0.2s;
+      outline: none;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    textarea:focus,
+    input[type=text]:focus {
+      border-color: var(--accent);
+      background: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    textarea {
+      min-height: 220px;
+      line-height: 1.5;
+    }
+
+    /* ── File drop zone ── */
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 4rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .dropzone input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .dropzone-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      transform: translateY(0);
+      transition: transform 0.3s;
+    }
+
+    .dropzone:hover .dropzone-icon {
+      transform: translateY(-5px);
+    }
+
+    .dropzone p {
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .dropzone .file-hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+      font-family: var(--mono);
+    }
+
+    /* ── Button ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.8rem 1.8rem;
+      border-radius: 10px;
+      border: none;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #818cf8);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+      filter: brightness(1.1);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      filter: none;
+      box-shadow: none;
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--surface-hover);
+      border-color: var(--muted);
+      transform: translateY(-1px);
+    }
+
+    /* ── Result panel ── */
+    #result-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #result-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    #result-panel.has-result::before {
+      opacity: 1;
+    }
+
+    #result-panel.has-result {
+      border-color: rgba(99, 102, 241, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .result-placeholder {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .result-class {
+      font-size: 1.8rem;
+      font-weight: 800;
+      font-family: var(--sans);
+      background: linear-gradient(to right, #fff, #a855f7);
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 0.4rem;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+
+    .result-conf {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1.8rem;
+      font-family: var(--mono);
+    }
+
+    .prob-bar-wrap {
+      margin-bottom: 0.8rem;
+    }
+
+    .prob-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--sans);
+    }
+
+    .prob-bar {
+      height: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .prob-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.8s cubic-bezier(0.1, 0.8, 0.2, 1);
+    }
+
+    /* ── History table ── */
+    .history-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 1rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+      font-family: var(--mono);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: var(--sans);
+      background: rgba(99, 102, 241, 0.1);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    /* ── Plots ── */
+    .plot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .plot-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.2rem;
+      background: var(--surface);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+    }
+
+    .plot-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .plot-card img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Train section ── */
+    .train-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #train-log {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      min-height: 150px;
+      max-height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-top: 1.5rem;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width:900px) {
+      .grid-3 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .plot-grid {
+        grid-template-columns: 1fr;
+      }
+
+      header,
+      .container {
+        padding: 1.5rem;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">📄</div>
-    <div>
-      <h1>Document Classification System <span>using Multi-Algorithm Ensemble Learning</span></h1>
-      <div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);">
-        <span id="status-dot"></span><span id="status-text">checking…</span>
-      </div>
-    </div>
-  </div>
-  <div style="display:flex;gap:0.8rem;align-items:center;">
-    <div class="badge">20 Newsgroups</div>
-    <div class="badge">TF-IDF + LR</div>
-  </div>
-</header>
-
-<div class="container">
-
-  <!-- Stats row -->
-  <div class="grid-3" id="stats-row">
-    <div class="card">
-      <div class="card-label">Test Accuracy</div>
-      <div class="card-value success" id="stat-acc">—</div>
-      <div class="card-sub">vs baseline: <span id="stat-base">—</span></div>
-    </div>
-    <div class="card">
-      <div class="card-label">CV Accuracy</div>
-      <div class="card-value accent" id="stat-cv">—</div>
-      <div class="card-sub">5-fold stratified</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Classes / Samples</div>
-      <div class="card-value warn" id="stat-classes">—</div>
-      <div class="card-sub">train: <span id="stat-train">—</span></div>
-    </div>
-  </div>
-
-  <!-- Classify section -->
-  <div class="section-title">Classify Document</div>
-
-  <div class="grid-2" style="margin-bottom:2.5rem;">
-    <div>
-      <div class="tabs">
-        <button class="tab active" onclick="switchTab('text',this)">Text Input</button>
-        <button class="tab" onclick="switchTab('file',this)">File Upload</button>
-      </div>
-
-      <!-- Text input -->
-      <div id="tab-text">
-        <textarea id="input-text" placeholder="Paste your document text here — news articles, emails, reports…"></textarea>
-        <div style="margin-top:0.8rem;display:flex;gap:0.8rem;">
-          <button class="btn btn-primary" onclick="classifyText()" id="btn-classify">
-            Classify Text
-          </button>
-          <button class="btn btn-outline" onclick="loadSample()">Load Sample</button>
-        </div>
-      </div>
-
-      <!-- File input -->
-      <div id="tab-file" style="display:none;">
-        <div class="dropzone" id="dropzone">
-          <input type="file" id="file-input" accept=".txt,.pdf,.docx" onchange="handleFile(this)"/>
-          <div class="dropzone-icon">📁</div>
-          <p id="drop-text">Drop your document here or click to browse</p>
-          <p class="file-hint">Supported: .txt  .pdf  .docx</p>
-        </div>
-        <div style="margin-top:0.8rem;">
-          <button class="btn btn-primary" onclick="classifyFile()" id="btn-classify-file" disabled>
-            Classify File
-          </button>
+  <header>
+    <div class="logo">
+      <div class="logo-icon">📄</div>
+      <div>
+        <h1>Document Classification System <span>using Multi-Algorithm Ensemble Learning</span></h1>
+        <div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);">
+          <span id="status-dot"></span><span id="status-text">checking…</span>
         </div>
       </div>
     </div>
+    <div style="display:flex;gap:0.8rem;align-items:center;">
+      <div class="badge">20 Newsgroups</div>
+      <div class="badge">TF-IDF + LR</div>
+    </div>
+  </header>
 
-    <!-- Result -->
-    <div id="result-panel">
-      <div class="result-placeholder">
-        ← Submit a document to see the classification result
+  <div class="container">
+
+    <!-- Stats row -->
+    <div class="grid-3" id="stats-row">
+      <div class="card">
+        <div class="card-label">Test Accuracy</div>
+        <div class="card-value success" id="stat-acc">—</div>
+        <div class="card-sub">vs baseline: <span id="stat-base">—</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">CV Accuracy</div>
+        <div class="card-value accent" id="stat-cv">—</div>
+        <div class="card-sub">5-fold stratified</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Classes / Samples</div>
+        <div class="card-value warn" id="stat-classes">—</div>
+        <div class="card-sub">train: <span id="stat-train">—</span></div>
       </div>
     </div>
-  </div>
 
-  <!-- History -->
-  <div class="section-title">Prediction History</div>
-  <div class="card" style="margin-bottom:2.5rem;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-      <span style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);">Last 20 predictions</span>
-      <button class="btn btn-outline" style="padding:0.35rem 0.8rem;font-size:0.75rem;" onclick="loadHistory()">↻ Refresh</button>
+    <!-- Classify section -->
+    <div class="section-title">Classify Document</div>
+
+    <div class="grid-2" style="margin-bottom:2.5rem;">
+      <div>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('text',this)">Text Input</button>
+          <button class="tab" onclick="switchTab('file',this)">File Upload</button>
+        </div>
+
+        <!-- Text input -->
+        <div id="tab-text">
+          <textarea id="input-text"
+            placeholder="Paste your document text here — news articles, emails, reports…"></textarea>
+          <div style="margin-top:0.8rem;display:flex;gap:0.8rem;">
+            <button class="btn btn-primary" onclick="classifyText()" id="btn-classify">
+              Classify Text
+            </button>
+            <button class="btn btn-outline" onclick="loadSample()">Load Sample</button>
+          </div>
+        </div>
+
+        <!-- File input -->
+        <div id="tab-file" style="display:none;">
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept=".txt,.pdf,.docx" onchange="handleFile(this)" />
+            <div class="dropzone-icon">📁</div>
+            <p id="drop-text">Drop your document here or click to browse</p>
+            <p class="file-hint">Supported: .txt .pdf .docx</p>
+          </div>
+          <div style="margin-top:0.8rem;">
+            <button class="btn btn-primary" onclick="classifyFile()" id="btn-classify-file" disabled>
+              Classify File
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div id="result-panel">
+        <div class="result-placeholder">
+          ← Submit a document to see the classification result
+        </div>
+      </div>
     </div>
-    <div class="history-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>Text Preview</th><th>Predicted Class</th><th>Confidence</th><th>Source</th><th>Timestamp</th>
-          </tr>
-        </thead>
-        <tbody id="history-body">
-          <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:2rem;">No history yet</td></tr>
-        </tbody>
-      </table>
+
+    <!-- History -->
+    <div class="section-title">Prediction History</div>
+    <div class="card" style="margin-bottom:2.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <span style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);">Last 20 predictions</span>
+        <button class="btn btn-outline" style="padding:0.35rem 0.8rem;font-size:0.75rem;" onclick="loadHistory()">↻
+          Refresh</button>
+      </div>
+      <div class="history-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Text Preview</th>
+              <th>Predicted Class</th>
+              <th>Confidence</th>
+              <th>Source</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="history-body">
+            <tr>
+              <td colspan="6" style="color:var(--muted);text-align:center;padding:2rem;">No history yet</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <!-- Analytics plots -->
-  <div class="section-title">Model Analytics</div>
-  <div class="plot-grid" id="plots-section">
-    <div class="plot-card">
-      <div class="card-label" style="margin-bottom:0.8rem;">Confusion Matrix</div>
-      <img id="plot-cm" src="/api/plots/confusion_matrix.png" alt="Confusion Matrix" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
-      <p style="display:none;color:var(--muted);font-family:var(--mono);font-size:0.8rem;padding:2rem;text-align:center;">Train the model to generate plots</p>
+    <!-- Analytics plots -->
+    <div class="section-title">Model Analytics</div>
+    <div class="plot-grid" id="plots-section">
+      <div class="plot-card">
+        <div class="card-label" style="margin-bottom:0.8rem;">Confusion Matrix</div>
+        <img id="plot-cm" src="/api/plots/confusion_matrix.png" alt="Confusion Matrix"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+        <p
+          style="display:none;color:var(--muted);font-family:var(--mono);font-size:0.8rem;padding:2rem;text-align:center;">
+          Train the model to generate plots</p>
+      </div>
+      <div class="plot-card">
+        <div class="card-label" style="margin-bottom:0.8rem;">Cross-Validation Scores</div>
+        <img id="plot-cv" src="/api/plots/cv_scores.png" alt="CV Scores"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+        <p
+          style="display:none;color:var(--muted);font-family:var(--mono);font-size:0.8rem;padding:2rem;text-align:center;">
+          Train the model to generate plots</p>
+      </div>
+      <div class="plot-card" style="grid-column:1/-1;">
+        <div class="card-label" style="margin-bottom:0.8rem;">Top Discriminative Features per Class</div>
+        <img id="plot-feat" src="/api/plots/top_features.png" alt="Top Features"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+        <p
+          style="display:none;color:var(--muted);font-family:var(--mono);font-size:0.8rem;padding:2rem;text-align:center;">
+          Train the model to generate plots</p>
+      </div>
     </div>
-    <div class="plot-card">
-      <div class="card-label" style="margin-bottom:0.8rem;">Cross-Validation Scores</div>
-      <img id="plot-cv" src="/api/plots/cv_scores.png" alt="CV Scores" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
-      <p style="display:none;color:var(--muted);font-family:var(--mono);font-size:0.8rem;padding:2rem;text-align:center;">Train the model to generate plots</p>
+
+    <!-- Train -->
+    <div class="section-title" style="margin-top:2.5rem;">Model Training</div>
+    <div class="train-card">
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1.2rem;">
+        Train the classifier on the 20 Newsgroups dataset. This runs GridSearchCV, cross-validation, generates plots,
+        and saves the model. Expect ~2–5 minutes.
+      </p>
+      <button class="btn btn-primary" onclick="triggerTraining()" id="btn-train">
+        🚀 Start Training
+      </button>
+      <div id="train-log" style="display:none;"></div>
     </div>
-    <div class="plot-card" style="grid-column:1/-1;">
-      <div class="card-label" style="margin-bottom:0.8rem;">Top Discriminative Features per Class</div>
-      <img id="plot-feat" src="/api/plots/top_features.png" alt="Top Features" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
-      <p style="display:none;color:var(--muted);font-family:var(--mono);font-size:0.8rem;padding:2rem;text-align:center;">Train the model to generate plots</p>
-    </div>
-  </div>
 
-  <!-- Train -->
-  <div class="section-title" style="margin-top:2.5rem;">Model Training</div>
-  <div class="train-card">
-    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1.2rem;">
-      Train the classifier on the 20 Newsgroups dataset. This runs GridSearchCV, cross-validation, generates plots, and saves the model. Expect ~2–5 minutes.
-    </p>
-    <button class="btn btn-primary" onclick="triggerTraining()" id="btn-train">
-      🚀 Start Training
-    </button>
-    <div id="train-log" style="display:none;"></div>
-  </div>
+  </div><!-- /container -->
 
-</div><!-- /container -->
+  <script>
+    // ── Class Mapping ──────────────────────────────────────────────────────────────
+    const CLASS_MAP = {
+      'alt.atheism': 'Atheism',
+      'comp.graphics': 'Computer Graphics',
+      'comp.sys.ibm.pc.hardware': 'PC Hardware',
+      'misc.forsale': 'For Sale',
+      'rec.autos': 'Automobiles',
+      'rec.sport.hockey': 'Hockey',
+      'sci.med': 'Medicine',
+      'sci.space': 'Space',
+      'soc.religion.christian': 'Christianity',
+      'talk.politics.guns': 'Politics (Guns)'
+    };
 
-<script>
-// ── Class Mapping ──────────────────────────────────────────────────────────────
-const CLASS_MAP = {
-  'alt.atheism': 'Atheism',
-  'comp.graphics': 'Computer Graphics',
-  'comp.sys.ibm.pc.hardware': 'PC Hardware',
-  'misc.forsale': 'For Sale',
-  'rec.autos': 'Automobiles',
-  'rec.sport.hockey': 'Hockey',
-  'sci.med': 'Medicine',
-  'sci.space': 'Space',
-  'soc.religion.christian': 'Christianity',
-  'talk.politics.guns': 'Politics (Guns)'
-};
-
-function getReadableName(rawClass) {
-  return CLASS_MAP[rawClass] || rawClass;
-}
-
-// ── State ──────────────────────────────────────────────────────────────────────
-let selectedFile = null;
-
-// ── Init ───────────────────────────────────────────────────────────────────────
-(async () => {
-  await loadStatus();
-  await loadHistory();
-})();
-
-// ── Status ─────────────────────────────────────────────────────────────────────
-async function loadStatus() {
-  try {
-    const res = await fetch('/api/status');
-    const d = await res.json();
-    const dot = document.getElementById('status-dot');
-    const txt = document.getElementById('status-text');
-
-    if (d.model_loaded) {
-      dot.className = 'ready';
-      txt.textContent = `Model ready · ${d.num_classes} classes`;
-    } else {
-      txt.textContent = 'Model not trained yet';
+    function getReadableName(rawClass) {
+      return CLASS_MAP[rawClass] || rawClass;
     }
 
-    const s = d.summary;
-    if (s && s.test_accuracy) {
-      document.getElementById('stat-acc').textContent  = (s.test_accuracy * 100).toFixed(1) + '%';
-      document.getElementById('stat-base').textContent = (s.baseline_accuracy * 100).toFixed(1) + '%';
-      document.getElementById('stat-cv').textContent   = (s.cv_mean * 100).toFixed(1) + '%';
-      document.getElementById('stat-classes').textContent = s.num_classes;
-      document.getElementById('stat-train').textContent   = s.train_samples?.toLocaleString() ?? '—';
+    // ── State ──────────────────────────────────────────────────────────────────────
+    let selectedFile = null;
+
+    // ── Init ───────────────────────────────────────────────────────────────────────
+    (async () => {
+      await loadStatus();
+      await loadHistory();
+    })();
+
+    // ── Status ─────────────────────────────────────────────────────────────────────
+    async function loadStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const d = await res.json();
+        const dot = document.getElementById('status-dot');
+        const txt = document.getElementById('status-text');
+
+        if (d.model_loaded) {
+          dot.className = 'ready';
+          txt.textContent = `Model ready · ${d.num_classes} classes`;
+        } else {
+          txt.textContent = 'Model not trained yet';
+        }
+
+        const s = d.summary;
+        if (s && s.test_accuracy) {
+          document.getElementById('stat-acc').textContent = (s.test_accuracy * 100).toFixed(1) + '%';
+          document.getElementById('stat-base').textContent = (s.baseline_accuracy * 100).toFixed(1) + '%';
+          document.getElementById('stat-cv').textContent = (s.cv_mean * 100).toFixed(1) + '%';
+          document.getElementById('stat-classes').textContent = s.num_classes;
+          document.getElementById('stat-train').textContent = s.train_samples?.toLocaleString() ?? '—';
+        }
+      } catch (e) { console.error(e); }
     }
-  } catch (e) { console.error(e); }
-}
 
-// ── Tab switch ─────────────────────────────────────────────────────────────────
-function switchTab(tab, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('tab-text').style.display = tab === 'text' ? 'block' : 'none';
-  document.getElementById('tab-file').style.display = tab === 'file' ? 'block' : 'none';
-}
+    // ── Tab switch ─────────────────────────────────────────────────────────────────
+    function switchTab(tab, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('tab-text').style.display = tab === 'text' ? 'block' : 'none';
+      document.getElementById('tab-file').style.display = tab === 'file' ? 'block' : 'none';
+    }
 
-// ── File handling ──────────────────────────────────────────────────────────────
-function handleFile(input) {
-  selectedFile = input.files[0];
-  if (selectedFile) {
-    document.getElementById('drop-text').textContent = `📄 ${selectedFile.name}`;
-    document.getElementById('btn-classify-file').disabled = false;
-  }
-}
+    // ── File handling ──────────────────────────────────────────────────────────────
+    function handleFile(input) {
+      selectedFile = input.files[0];
+      if (selectedFile) {
+        document.getElementById('drop-text').textContent = `📄 ${selectedFile.name}`;
+        document.getElementById('btn-classify-file').disabled = false;
+      }
+    }
 
-const dz = document.getElementById('dropzone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-dz.addEventListener('drop', e => {
-  e.preventDefault(); dz.classList.remove('dragover');
-  const f = e.dataTransfer.files[0];
-  if (f) {
-    selectedFile = f;
-    document.getElementById('drop-text').textContent = `📄 ${f.name}`;
-    document.getElementById('btn-classify-file').disabled = false;
-  }
-});
-
-// ── Classify text ──────────────────────────────────────────────────────────────
-async function classifyText() {
-  const text = document.getElementById('input-text').value.trim();
-  if (!text) return alert('Please enter some text.');
-  const btn = document.getElementById('btn-classify');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Classifying…';
-
-  try {
-    const res = await fetch('/api/predict/text', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({text})
+    const dz = document.getElementById('dropzone');
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault(); dz.classList.remove('dragover');
+      const f = e.dataTransfer.files[0];
+      if (f) {
+        selectedFile = f;
+        document.getElementById('drop-text').textContent = `📄 ${f.name}`;
+        document.getElementById('btn-classify-file').disabled = false;
+      }
     });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.error);
-    showResult(d);
-    loadHistory();
-  } catch(e) { alert('Error: ' + e.message); }
-  finally { btn.disabled=false; btn.innerHTML='Classify Text'; }
-}
 
-// ── Classify file ──────────────────────────────────────────────────────────────
-async function classifyFile() {
-  if (!selectedFile) return alert('Please select a file.');
-  const btn = document.getElementById('btn-classify-file');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Extracting…';
+    // ── Classify text ──────────────────────────────────────────────────────────────
+    async function classifyText() {
+      const text = document.getElementById('input-text').value.trim();
+      if (!text) return alert('Please enter some text.');
+      const btn = document.getElementById('btn-classify');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Classifying…';
 
-  try {
-    const fd = new FormData();
-    fd.append('file', selectedFile);
-    const res = await fetch('/api/predict/file', { method:'POST', body:fd });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.error);
-    showResult(d);
-    loadHistory();
-  } catch(e) { alert('Error: ' + e.message); }
-  finally { btn.disabled=false; btn.innerHTML='Classify File'; }
-}
+      try {
+        const res = await fetch('/api/predict/text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error);
+        showResult(d);
+        loadHistory();
+      } catch (e) { alert('Error: ' + e.message); }
+      finally { btn.disabled = false; btn.innerHTML = 'Classify Text'; }
+    }
 
-// ── Render result ──────────────────────────────────────────────────────────────
-function showResult(d) {
-  const panel = document.getElementById('result-panel');
-  panel.classList.add('has-result');
-  const conf = (d.confidence * 100).toFixed(1);
-  const readableClass = getReadableName(d.predicted_class);
+    // ── Classify file ──────────────────────────────────────────────────────────────
+    async function classifyFile() {
+      if (!selectedFile) return alert('Please select a file.');
+      const btn = document.getElementById('btn-classify-file');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Extracting…';
 
-  let barsHtml = (d.top_predictions || []).map(p => {
-    const pct = (p.probability * 100).toFixed(1);
-    const readable = getReadableName(p.class);
-    return `<div class="prob-bar-wrap">
+      try {
+        const fd = new FormData();
+        fd.append('file', selectedFile);
+        const res = await fetch('/api/predict/file', { method: 'POST', body: fd });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error);
+        showResult(d);
+        loadHistory();
+      } catch (e) { alert('Error: ' + e.message); }
+      finally { btn.disabled = false; btn.innerHTML = 'Classify File'; }
+    }
+
+    // ── Render result ──────────────────────────────────────────────────────────────
+    function showResult(d) {
+      const panel = document.getElementById('result-panel');
+      panel.classList.add('has-result');
+      const conf = (d.confidence * 100).toFixed(1);
+      const readableClass = getReadableName(d.predicted_class);
+
+      let barsHtml = (d.top_predictions || []).map(p => {
+        const pct = (p.probability * 100).toFixed(1);
+        const readable = getReadableName(p.class);
+        return `<div class="prob-bar-wrap">
       <div class="prob-label"><span>${readable}</span><span>${pct}%</span></div>
       <div class="prob-bar"><div class="prob-fill" style="width:${pct}%"></div></div>
     </div>`;
-  }).join('');
+      }).join('');
 
-  panel.innerHTML = `
+      panel.innerHTML = `
     <div class="result-class">${readableClass}</div>
     <div class="result-conf">Confidence: ${conf}% · ${d.filename ? '📎 ' + d.filename : '📝 text input'}</div>
     ${barsHtml}
   `;
-}
-
-// ── History ────────────────────────────────────────────────────────────────────
-async function loadHistory() {
-  try {
-    const res = await fetch('/api/history?limit=20');
-    const d = await res.json();
-    const tbody = document.getElementById('history-body');
-    if (!d.predictions.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:2rem;">No predictions yet</td></tr>';
-      return;
     }
-    tbody.innerHTML = d.predictions.map((r,i) => `
+
+    // ── History ────────────────────────────────────────────────────────────────────
+    async function loadHistory() {
+      try {
+        const res = await fetch('/api/history?limit=20');
+        const d = await res.json();
+        const tbody = document.getElementById('history-body');
+        if (!d.predictions.length) {
+          tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:2rem;">No predictions yet</td></tr>';
+          return;
+        }
+        tbody.innerHTML = d.predictions.map((r, i) => `
       <tr>
-        <td style="color:var(--muted)">${i+1}</td>
-        <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.input_text?.substring(0,80) ?? '—'}…</td>
+        <td style="color:var(--muted)">${i + 1}</td>
+        <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.input_text?.substring(0, 80) ?? '—'}…</td>
         <td><span class="pill">${getReadableName(r.predicted_category) ?? '—'}</span></td>
-        <td>${r.confidence != null ? (r.confidence*100).toFixed(1)+'%' : '—'}</td>
+        <td>${r.confidence != null ? (r.confidence * 100).toFixed(1) + '%' : '—'}</td>
         <td style="color:var(--muted)">${r.source ?? '—'}</td>
-        <td style="color:var(--muted)">${(r.timestamp ?? '').replace('T',' ').slice(0,19)}</td>
+        <td style="color:var(--muted)">${(r.timestamp ?? '').replace('T', ' ').slice(0, 19)}</td>
       </tr>
     `).join('');
-  } catch(e) { console.error(e); }
-}
+      } catch (e) { console.error(e); }
+    }
 
-// ── Sample ─────────────────────────────────────────────────────────────────────
-function loadSample() {
-  const samples = [
-    `NASA announced that the Hubble Space Telescope has captured stunning new images of distant galaxies, providing insights into the early universe. Scientists are particularly excited about the data revealing star formation in nebulae.`,
-    `The NHL playoffs are heating up with overtime thrillers and record-breaking performances. The goalie stopped 47 shots in double overtime to keep his team alive in the series.`,
-    `I'm looking to sell my IBM ThinkPad laptop, barely used. It has 16GB RAM, 512GB SSD, Intel Core i7 processor. Asking price $600 OBO. Comes with original charger and case.`,
-    `The government's new gun control bill passed the Senate today with bipartisan support. Critics argue it infringes on Second Amendment rights while supporters say it's a necessary safety measure.`,
-    `My graphics card is having issues rendering OpenGL textures. The 3D image appears corrupted when using certain shader programs. Has anyone encountered this with NVIDIA drivers?`
-  ];
-  document.getElementById('input-text').value = samples[Math.floor(Math.random()*samples.length)];
-}
+    // ── Sample ─────────────────────────────────────────────────────────────────────
+    function loadSample() {
+      const samples = [
+        `NASA announced that the Hubble Space Telescope has captured stunning new images of distant galaxies, providing insights into the early universe. Scientists are particularly excited about the data revealing star formation in nebulae.`,
+        `The NHL playoffs are heating up with overtime thrillers and record-breaking performances. The goalie stopped 47 shots in double overtime to keep his team alive in the series.`,
+        `I'm looking to sell my IBM ThinkPad laptop, barely used. It has 16GB RAM, 512GB SSD, Intel Core i7 processor. Asking price $600 OBO. Comes with original charger and case.`,
+        `The government's new gun control bill passed the Senate today with bipartisan support. Critics argue it infringes on Second Amendment rights while supporters say it's a necessary safety measure.`,
+        `My graphics card is having issues rendering OpenGL textures. The 3D image appears corrupted when using certain shader programs. Has anyone encountered this with NVIDIA drivers?`
+      ];
+      document.getElementById('input-text').value = samples[Math.floor(Math.random() * samples.length)];
+    }
 
-// ── Train ──────────────────────────────────────────────────────────────────────
-async function triggerTraining() {
-  const btn = document.getElementById('btn-train');
-  const log = document.getElementById('train-log');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Training in progress… (~3 min)';
-  log.style.display = 'block';
-  log.textContent = 'Starting training pipeline…\n';
+    // ── Train ──────────────────────────────────────────────────────────────────────
+    async function triggerTraining() {
+      const btn = document.getElementById('btn-train');
+      const log = document.getElementById('train-log');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Training in progress… (~3 min)';
+      log.style.display = 'block';
+      log.textContent = 'Starting training pipeline…\n';
 
-  const tick = setInterval(() => { log.textContent += '.'; log.scrollTop=9999; }, 3000);
+      const tick = setInterval(() => { log.textContent += '.'; log.scrollTop = 9999; }, 3000);
 
-  try {
-    const res = await fetch('/api/train', { method:'POST' });
-    const d = await res.json();
-    clearInterval(tick);
-    if (!res.ok) throw new Error(d.error);
-    log.textContent += `\n\n✅ Training complete!\n`;
-    log.textContent += `Test Accuracy : ${(d.summary.test_accuracy*100).toFixed(2)}%\n`;
-    log.textContent += `CV Accuracy   : ${(d.summary.cv_mean*100).toFixed(2)}% ± ${(d.summary.cv_std*100).toFixed(2)}%\n`;
-    log.textContent += `Baseline Acc  : ${(d.summary.baseline_accuracy*100).toFixed(2)}%\n`;
-    // Reload plots
-    ['plot-cm','plot-cv','plot-feat'].forEach(id => {
-      const img = document.getElementById(id);
-      img.src = img.src.split('?')[0] + '?t=' + Date.now();
-      img.style.display='block';
-    });
-    await loadStatus();
-    btn.innerHTML = '✅ Retrain';
-  } catch(e) {
-    clearInterval(tick);
-    log.textContent += `\n\n❌ Error: ${e.message}`;
-    btn.innerHTML = '🚀 Start Training';
-  }
-  btn.disabled = false;
-}
-</script>
+      try {
+        const res = await fetch('/api/train', { method: 'POST' });
+        const d = await res.json();
+        clearInterval(tick);
+        if (!res.ok) throw new Error(d.error);
+        log.textContent += `\n\n✅ Training complete!\n`;
+        log.textContent += `Test Accuracy : ${(d.summary.test_accuracy * 100).toFixed(2)}%\n`;
+        log.textContent += `CV Accuracy   : ${(d.summary.cv_mean * 100).toFixed(2)}% ± ${(d.summary.cv_std * 100).toFixed(2)}%\n`;
+        log.textContent += `Baseline Acc  : ${(d.summary.baseline_accuracy * 100).toFixed(2)}%\n`;
+        // Reload plots
+        ['plot-cm', 'plot-cv', 'plot-feat'].forEach(id => {
+          const img = document.getElementById(id);
+          img.src = img.src.split('?')[0] + '?t=' + Date.now();
+          img.style.display = 'block';
+        });
+        await loadStatus();
+        btn.innerHTML = '✅ Retrain';
+      } catch (e) {
+        clearInterval(tick);
+        log.textContent += `\n\n❌ Error: ${e.message}`;
+        btn.innerHTML = '🚀 Start Training';
+      }
+      btn.disabled = false;
+    }
+  </script>
 </body>
+
 </html>
